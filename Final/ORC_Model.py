@@ -32,50 +32,65 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     sl_col = 6 # Entropy of saturated liquid kJ/(kgK)
     sv_col = 7 # Entropy of saturated vapor kJ/(kgK)
         
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                              boil_pres, press_col, hv_col)
     
-    h1 = mf.interpolate(x1,x2,y1,y2,boil_pres)
+    h1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
     
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                              boil_pres, press_col, sv_col)
     
-    s1 = mf.interpolate(x1,x2,y1,y2,boil_pres)
+    s1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
     s2 = s1 # This is the adiabatic volumetric assumption in the turbine
 
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                              cond_pres, press_col, hl_col)
     
-    h3 = mf.interpolate(x1,x2,y1,y2,cond_pres)
+    h3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
     
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                              cond_pres, press_col, sl_col)
     
-    s3 = mf.interpolate(x1,x2,y1,y2,cond_pres)
+    s3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
 
     # get h3 enthalpy of a saturated liquid at condenser pressure
     # get s3 entropy of a saturated vapor at condenser pressure
 
     # determine if the working fluid is wet, dry, or adiabatic.
 
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                                    cond_pres, press_col, sl_col)
 
-    s2f = mf.interpolate(x1,x2,y1,y2,cond_pres)
-    x1,x2,y1,y2 = mf.vlookup(db_path+R245fa_db,
+    s2f = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                                    cond_pres, press_col, sv_col)
 
-    s2g = mf.interpolate(x1,x2,y1,y2,cond_pres)
+    s2g = mf.interpolate(x1,y1,x2,y2,cond_pres)
 
-    quality = (s2 - s2f)/(s2g - s2f)
+    try:
+        quality = (s2 - s2f)/(s2g - s2f)
+    except ZeroDivisionError:
+        quality = 0
+    
     h2f = h3
 
     
     # h2g = enthalpy at state 2 for a saturated liquid
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db, cond_pres, press_col, hv_col)
+    h2g = mf.interpolate(x1,y1,x2,y2, cond_pres)
     h2fg = h2g-h2f
     h2s = h2f + quality* h2fg
     h2 = h1 - eff_t*(h1 - h2s)
+
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db, boil_pres, press_col, v_col)
+    specific_vol_3 = mf.interpolate(x1,y1,x2,y2, boil_pres)
+    h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
+
+    W_m = h1-h2-h4+h3 # Watts of power per kg/s of mass flow rate
+    efficiency = ((h1-h2) - (h4-h3))/(h1-h4)
     
+    print("Quality: {:4.2f}\nPower: {:4.2f}W/(kg/s)\nEfficiency: {:4.2f}" \
+          .format(quality, W_m, efficiency))
 
 #------Main------#
 if __name__ == '__main__':
