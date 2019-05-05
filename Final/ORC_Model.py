@@ -5,6 +5,16 @@ import numpy as np
 import pandas as pd
 import misc_functions as mf
 import sanitize_inputs as si
+import time
+
+def LMTD(Tin, Tout, tin, tout):
+    '''This function determines the log mean temperature difference of two
+    working fluids where the temperature at the inlet and outlet of both
+    fluids is known. This function is valid for a counter flow heat
+    exchanger.'''
+
+    LMTD = ((Tin-tout) - (tin-Tout)) / math.log((Tin-tout)/(tin-Tout))
+    return(LMTD)
 
 def boiler_model():
     pass
@@ -92,11 +102,13 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     print("Quality: {:4.2f}\nPower: {:4.2f}W/(kg/s)\nEfficiency: {:4.2f}" \
           .format(quality, W_m, efficiency))
 
+    #Return(Win_m, Wout_m,Qin_m, Qout_m,efficiency)
+
 #------Main------#
 if __name__ == '__main__':
     '''Manual entry begins here.'''
-    condenser_pressure = si.get_real_number("Enter condenser pressure.\n>>>")
-    boiler_pressure = si.get_real_number("Enter boiler pressure.\n>>>")
+    condenser_pressure = si.get_real_number("Enter condenser pressure (MPa).\n>>>")
+    boiler_pressure = si.get_real_number("Enter boiler pressure (MPa).\n>>>")
     turbine_efficiency = si.get_real_number("Enter the turbine efficiency (0-1).\n>>>",
                                             upper=1.0,lower=0)
     pump_efficiency = si.get_real_number("Enter the pump efficiency (0-1).\n>>>",
@@ -105,5 +117,7 @@ if __name__ == '__main__':
               boiler_pressure,
               turbine_efficiency,
               pump_efficiency)
+
+    time.sleep(30)
 else:
     pass
