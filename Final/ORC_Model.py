@@ -96,10 +96,10 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     specific_vol_3 = mf.interpolate(x1,y1,x2,y2, boil_pres)
     h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
 
-    W_m = h1-h2-h4+h3 # Watts of power per kg/s of mass flow rate
+    W_m = h1-h2-h4+h3 # kilowatts of power per kg/s of mass flow rate
     efficiency = ((h1-h2) - (h4-h3))/(h1-h4)
     
-    print("Quality: {:4.2f}\nPower: {:4.2f}W/(kg/s)\nEfficiency: {:4.2f}" \
+    print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
           .format(quality, W_m, efficiency))
 
     #Return(Win_m, Wout_m,Qin_m, Qout_m,efficiency)
