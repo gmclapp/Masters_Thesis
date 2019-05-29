@@ -102,6 +102,14 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
           .format(quality, W_m, efficiency))
 
+    x1, y1, x2, y2 = mf.vlookup(db_path+R245fa_db,
+                               cond_pres, press_col, temp_col)
+    cond_temp = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+                            boil_pres, press_col, temp_col)
+    boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
+    print("Condenser temperature: {:4.2f}\nBoiler temperature: {:4.2f}" \
+          .format(cond_temp,boil_temp))
     #Return(Win_m, Wout_m,Qin_m, Qout_m,efficiency)
 
 #------Main------#
