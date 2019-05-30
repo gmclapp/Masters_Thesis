@@ -108,9 +108,9 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
                             boil_pres, press_col, temp_col)
     boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
-    print("Condenser temperature: {:4.2f}\nBoiler temperature: {:4.2f}" \
+    print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
           .format(cond_temp,boil_temp))
-    #Return(Win_m, Wout_m,Qin_m, Qout_m,efficiency)
+    return(W_m,efficiency,boil_temp,cond_temp)
 
 #------Main------#
 if __name__ == '__main__':
@@ -121,7 +121,8 @@ if __name__ == '__main__':
                                             upper=1.0,lower=0)
     pump_efficiency = si.get_real_number("Enter the pump efficiency (0-1).\n>>>",
                                          upper=1.0, lower=0)
-    ORC_model(condenser_pressure,
+    max_heat = si.get_real_number("Enter maximum heat source temperature (K).\n>>>")
+    (Wm,efficiency,boil_temp,cond_temp) = ORC_model(condenser_pressure,
               boiler_pressure,
               turbine_efficiency,
               pump_efficiency)
