@@ -8,13 +8,13 @@ import sanitize_inputs as si
 import time
 import os
 
-def LMTD(Tin, Tout, tin, tout):
+def LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out):
     '''This function determines the log mean temperature difference of two
     working fluids where the temperature at the inlet and outlet of both
     fluids is known. This function is valid for a counter flow heat
     exchanger.'''
 
-    LMTD = ((Tin-tout) - (tin-Tout)) / math.log((Tin-tout)/(tin-Tout))
+    LMTD = ((T_hot_out-T_cold_out) - (T_hot_in-T_cold_in)) / math.log((T_hot_out-T_cold_out)/(T_hot_in-T_cold_in))
     return(LMTD)
 
 def boiler_model():
@@ -101,6 +101,8 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
 
     W_m = h1-h2-h4+h3 # kilowatts of power per kg/s of mass flow rate
+    Qin_m = h1-h4 # kilowatts of heat trasfer in per kg/s of mass flow rate
+    Qout_m = h2-h3 # kilowatts of heat transfer out per kg/s of mass flow rate
     efficiency = ((h1-h2) - (h4-h3))/(h1-h4)
     
     print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
@@ -114,7 +116,7 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
     print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
           .format(cond_temp,boil_temp))
-    return(W_m,efficiency,boil_temp,cond_temp)
+    return(W_m,efficiency,boil_temp,cond_temp,Qin_m,Qout_m)
 
 #------Main------#
 if __name__ == '__main__':
@@ -126,10 +128,15 @@ if __name__ == '__main__':
     pump_efficiency = si.get_real_number("Enter the pump efficiency (0-1).\n>>>",
                                          upper=1.0, lower=0)
     max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
-    (Wm,efficiency,boil_temp,cond_temp) = ORC_model(condenser_pressure,
+
+    # Run cycle model
+    (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,
               boiler_pressure,
               turbine_efficiency,
               pump_efficiency)
+
+    # Determine boiler heat exchanger size
+    lmtd = LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out)
 
     time.sleep(30)
 else:
