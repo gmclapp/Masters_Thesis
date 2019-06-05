@@ -119,13 +119,13 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
 #------Main------#
 if __name__ == '__main__':
     '''Manual entry begins here.'''
-    condenser_pressure = si.get_real_number("Enter condenser pressure (MPa).\n>>>")
-    boiler_pressure = si.get_real_number("Enter boiler pressure (MPa).\n>>>")
+    condenser_pressure = si.get_real_number("Enter condenser pressure (MPa).\n>>>",lower = 0)
+    boiler_pressure = si.get_real_number("Enter boiler pressure (MPa).\n>>>", lower = condenser_pressure)
     turbine_efficiency = si.get_real_number("Enter the turbine efficiency (0-1).\n>>>",
                                             upper=1.0,lower=0)
     pump_efficiency = si.get_real_number("Enter the pump efficiency (0-1).\n>>>",
                                          upper=1.0, lower=0)
-    max_heat = si.get_real_number("Enter maximum heat source temperature (K).\n>>>")
+    max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
     (Wm,efficiency,boil_temp,cond_temp) = ORC_model(condenser_pressure,
               boiler_pressure,
               turbine_efficiency,
