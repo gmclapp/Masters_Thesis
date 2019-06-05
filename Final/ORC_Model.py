@@ -6,6 +6,7 @@ import pandas as pd
 import misc_functions as mf
 import sanitize_inputs as si
 import time
+import os
 
 def LMTD(Tin, Tout, tin, tout):
     '''This function determines the log mean temperature difference of two
@@ -32,7 +33,10 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     models for the individual major components.'''
 
     R245fa_db = '\\R245fa Saturated properties temperature table.csv'
-    db_path = r'C:\Users\Glenn Clapp\Documents\GitHub\Masters_Thesis\GHSP study\Additional references'
+    os.chdir("..")
+    db_path=os.path.abspath(os.curdir)+r"\GHSP study\Additional references"
+    print(db_path)
+    #db_path = r'C:\Users\Glenn Clapp\Documents\GitHub\Masters_Thesis\GHSP study\Additional references'
 
     temp_col = 0 # Degrees Celsius
     press_col = 1 # MPa
