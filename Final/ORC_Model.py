@@ -107,6 +107,8 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     
     print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
           .format(quality, W_m, efficiency))
+    print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)"\
+          .format(Qin_m,Qout_m))
 
     x1, y1, x2, y2 = mf.vlookup(db_path+R245fa_db,
                                cond_pres, press_col, temp_col)
@@ -130,11 +132,13 @@ if __name__ == '__main__':
     max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
 
     # Run cycle model
-    (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,
-              boiler_pressure,
-              turbine_efficiency,
-              pump_efficiency)
-
+    boil_temp = float("Inf")
+    while boil_temp > max_heat:
+        (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency)
+        boiler_pressure -= 0.01
+        
+    print("Boiler pressure: {}".format(boiler_pressure))
+    
     # Determine boiler heat exchanger size
     lmtd = LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out)
 
