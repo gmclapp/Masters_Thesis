@@ -25,19 +25,13 @@ def turbine_model():
     pass
 def pump_model():
     pass
-def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
+def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     '''This function takes a working pressure for a condenser and boiler, an
     efficiency for a pump and turbine, and outputs the work per unit mass flow
     and thermal efficiency for a generic ORC, as well as the working temperature
     and enthalpy at each of the four fixed states which can then be used in the
     models for the individual major components.'''
-
-    R245fa_db = '\\R245fa Saturated properties temperature table.csv'
-    os.chdir("..")
-    db_path=os.path.abspath(os.curdir)+r"\GHSP study\Additional references"
-    print(db_path)
-    #db_path = r'C:\Users\Glenn Clapp\Documents\GitHub\Masters_Thesis\GHSP study\Additional references'
-
+    
     temp_col = 0 # Degrees Celsius
     press_col = 1 # MPa
     v_col = 3 # Specific volume of vapor m3/kg
@@ -46,23 +40,23 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     sl_col = 6 # Entropy of saturated liquid kJ/(kgK)
     sv_col = 7 # Entropy of saturated vapor kJ/(kgK)
         
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              boil_pres, press_col, hv_col)
     
     h1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
     
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              boil_pres, press_col, sv_col)
     
     s1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
     s2 = s1 # This is the adiabatic volumetric assumption in the turbine
 
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              cond_pres, press_col, hl_col)
     
     h3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
     
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              cond_pres, press_col, sl_col)
     
     s3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
@@ -72,11 +66,11 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
 
     # determine if the working fluid is wet, dry, or adiabatic.
 
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                                    cond_pres, press_col, sl_col)
 
     s2f = mf.interpolate(x1,y1,x2,y2,cond_pres)
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                                    cond_pres, press_col, sv_col)
 
     s2g = mf.interpolate(x1,y1,x2,y2,cond_pres)
@@ -90,13 +84,13 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
 
     
     # h2g = enthalpy at state 2 for a saturated liquid
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db, cond_pres, press_col, hv_col)
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db, cond_pres, press_col, hv_col)
     h2g = mf.interpolate(x1,y1,x2,y2, cond_pres)
     h2fg = h2g-h2f
     h2s = h2f + quality* h2fg
     h2 = h1 - eff_t*(h1 - h2s)
 
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db, boil_pres, press_col, v_col)
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db, boil_pres, press_col, v_col)
     specific_vol_3 = mf.interpolate(x1,y1,x2,y2, boil_pres)
     h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
 
@@ -110,10 +104,10 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p):
     print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)"\
           .format(Qin_m,Qout_m))
 
-    x1, y1, x2, y2 = mf.vlookup(db_path+R245fa_db,
+    x1, y1, x2, y2 = mf.vlookup(working_fluid_db,
                                cond_pres, press_col, temp_col)
     cond_temp = mf.interpolate(x1,y1,x2,y2,cond_pres)
-    x1,y1,x2,y2 = mf.vlookup(db_path+R245fa_db,
+    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                             boil_pres, press_col, temp_col)
     boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
     print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
