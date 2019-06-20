@@ -99,10 +99,10 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     Qout_m = h2-h3 # kilowatts of heat transfer out per kg/s of mass flow rate
     efficiency = ((h1-h2) - (h4-h3))/(h1-h4)
     
-    print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
-          .format(quality, W_m, efficiency))
-    print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)"\
-          .format(Qin_m,Qout_m))
+##    print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
+##          .format(quality, W_m, efficiency))
+##    print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)"\
+##          .format(Qin_m,Qout_m))
 
     x1, y1, x2, y2 = mf.vlookup(working_fluid_db,
                                cond_pres, press_col, temp_col)
@@ -110,8 +110,8 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                             boil_pres, press_col, temp_col)
     boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
-    print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
-          .format(cond_temp,boil_temp))
+##    print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
+##          .format(cond_temp,boil_temp))
     return(W_m,efficiency,boil_temp,cond_temp,Qin_m,Qout_m)
 
 #------Main------#
