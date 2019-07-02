@@ -2,42 +2,7 @@ import csv
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-import misc_functions as mf
-import sanitize_inputs as si
-import time
-import os
-
-def LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out):
-    '''This function determines the log mean temperature difference of two
-    working fluids where the temperature at the inlet and outlet of both
-    fluids is known. This function is valid for a counter flow heat
-    exchanger.'''
-
-    LMTD = ((T_hot_out-T_cold_out) - (T_hot_in-T_cold_in)) / math.log((T_hot_out-T_cold_out)/(T_hot_in-T_cold_in))
-    return(LMTD)
-
-def boiler_model():
-    pass
-def condenser_model():
-    pass
-def turbine_model():
-    pass
-def pump_model():
-    pass
-def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
-    '''This function takes a working pressure for a condenser and boiler, an
-    efficiency for a pump and turbine, and outputs the work per unit mass flow
-    and thermal efficiency for a generic ORC, as well as the working temperature
-    and enthalpy at each of the four fixed states which can then be used in the
-    models for the individual major components.'''
-    
-    temp_col = 0 # Degrees Celsius
-    press_col = 1 # MPa
-    v_col = 3 # Specific volume of vapor m3/kg
-    hl_col = 4 # Enthalpy of saturated liquid kJ/kg
-    hv_col = 5 # Enthalpy of saturated vapor kJ/kg
-    sl_col = 6 # Entropy of saturated liquid kJ/(kgK)
+import z kJ/(kgK)
     sv_col = 7 # Entropy of saturated vapor kJ/(kgK)
         
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
