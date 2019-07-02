@@ -45,15 +45,21 @@ def find_best(condenser_pressure, boiler_pressure, turbine_efficiency=0.9,
                                                                 turbine_efficiency,
                                                                 pump_efficiency,
                                                                 db_path)
-                if Wm > max_power:
-                    max_power = Wm
-                    power_b_pressure = b
-                    power_c_pressure = c
+            if Wm > max_power:
+                max_power = Wm
+                power_b_pressure = b
+                power_c_pressure = c
 
-                if eff > max_efficiency:
-                    max_efficiency = eff
-                    efficiency_b_pressure = b
-                    efficiency_c_pressure = c
+            if eff > max_efficiency:
+                max_efficiency = eff
+                efficiency_b_pressure = b
+                efficiency_c_pressure = c
+    return(max_power,
+           power_b_pressure,
+           power_c_pressure,
+           max_efficiency,
+           efficiency_b_pressure,
+           efficiency_c_pressure)
                     
     
 R245fa_db = '\\R245fa Saturated properties temperature table.csv'
@@ -68,3 +74,10 @@ condenser_pressure_range = np.linspace(0.1225, 0.5, 25)
 # Creates a numpy array with 25 data points between 0.1225 and 0.5.
 boiler_pressure_range = np.linspace(0.5, 1.26, 25)
 # Max boiler pressure in range determined by earlier numerical analysis.
+turbine_efficiency = 0.787
+pump_efficiency = 0.9
+
+print(find_best(condenser_pressure_range,
+          boiler_pressure_range,
+          turbine_efficiency,
+          pump_efficiency))
