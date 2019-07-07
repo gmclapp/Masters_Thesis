@@ -1,4 +1,5 @@
 import ORC_Model as orc
+from heat_exchanger_model import tube_in_shell as heatex
 import os
 import numpy as np
 import pandas as pd
@@ -77,7 +78,17 @@ boiler_pressure_range = np.linspace(0.5, 1.26, 25)
 turbine_efficiency = 0.787
 pump_efficiency = 0.9
 
-print(find_best(condenser_pressure_range,
-          boiler_pressure_range,
-          turbine_efficiency,
-          pump_efficiency))
+power,b_power,c_power,eff,b_eff,c_eff =find_best(condenser_pressure_range,
+                                                 boiler_pressure_range,
+                                                 turbine_efficiency,
+                                                 pump_efficiency)
+
+(Wm,eff,b_temp,c_temp,Qin_m,Qout_m) = orc.ORC_model(c_power,
+                                                    b_power,
+                                                    turbine_efficiency,
+                                                    pump_efficiency,
+                                                    db_path)
+print("Power output: {:4.2f}".format(Wm))
+print("Boiler working temp: {:4.2f}".format(b_temp))
+heatex(Th245=b_temp, Tc245 = c_temp)
+##heatex(Th245 = 75)
