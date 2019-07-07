@@ -8,23 +8,6 @@ import sanitize_inputs as si
 import time
 import os
 
-def LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out):
-    '''This function determines the log mean temperature difference of two
-    working fluids where the temperature at the inlet and outlet of both
-    fluids is known. This function is valid for a counter flow heat
-    exchanger.'''
-
-    LMTD = ((T_hot_out-T_cold_out) - (T_hot_in-T_cold_in)) / math.log((T_hot_out-T_cold_out)/(T_hot_in-T_cold_in))
-    return(LMTD)
-
-def boiler_model():
-    pass
-def condenser_model():
-    pass
-def turbine_model():
-    pass
-def pump_model():
-    pass
 def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     '''This function takes a working pressure for a condenser and boiler, an
     efficiency for a pump and turbine, and outputs the work per unit mass flow

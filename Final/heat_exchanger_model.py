@@ -43,7 +43,8 @@ def tube_in_shell(Th245=90,Tc245=60):
     Tcfeedwater = Thfeedwater - dT
 
     # LMTD Method
-    dTm = ((dT) - (Th245 - Tc245))/math.log(dT/(Th245 - Tc245))
+    print("245 in: {:4.2f}C\n245 out: {:4.2f}C\nFeed in: {:4.2f}C\nFeed out: {:4.2f}C".format(Tc245,Th245,Thfeedwater,Tcfeedwater))
+    dTm = ((Tcfeedwater-Th245) - (Tc245-Th245)) / math.log((Tcfeedwater-Th245)/(Thfeedwater-Tc245))
     print("Mean temperature difference: {:4.2f}C".format(dTm))
 
     # In the future, the heat transfer coefficient should be calculated. for now,

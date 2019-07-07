@@ -68,7 +68,7 @@ os.chdir("..")# Navigate up a directory
 db_path=os.path.abspath(os.curdir)+r"\GHSP study\Additional references"+R245fa_db
 # Navigate to the directory containing the working fluid database.
 
-##find_max_boiler(db_path)
+find_max_boiler(db_path)
 
 
 condenser_pressure_range = np.linspace(0.1225, 0.5, 25)
@@ -88,7 +88,7 @@ power,b_power,c_power,eff,b_eff,c_eff =find_best(condenser_pressure_range,
                                                     turbine_efficiency,
                                                     pump_efficiency,
                                                     db_path)
-print("Power output: {:4.2f}".format(Wm))
-print("Boiler working temp: {:4.2f}".format(b_temp))
+print("Power output: {:4.2f}kW".format(Wm))
+print("Boiler working temp: {:4.2f}C".format(b_temp))
 heatex(Th245=b_temp, Tc245 = c_temp)
 ##heatex(Th245 = 75)
