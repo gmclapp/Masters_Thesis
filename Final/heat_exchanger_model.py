@@ -5,53 +5,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 import misc_functions as mf
 
-def tube_in_shell(Th245=90,Tc245=60):
-    '''Returns the required heat exchanger area in square meters to
-    achieve the boiler and condenser working temperatures specified in
-    degrees Celsius.
+def LMTD(Th1, Th2, Tc1, Tc2):
+    '''Returns the log mean temperature difference given the entry and exit
+    temperatures of the hot fluid, Th1 and Th2, and the entry and exit
+    temperatures of the cool fluid, Tc1 and Tc2.'''
 
-    Uses a mass flow rate of 1kg/s for both working fluids and assumes R245fa
-    for the ORC working fluid and a 50/50 water glycol mix for the heat
-    source working fluid.'''
+    log_mean_temp_diff = ((Th2-Tc2)-(Th1-Tc1))/math.log(((Th2-Tc2)/(Th1-Tc1)))
+    return(log_mean_temp_diff)
+
+def feedwater_exit_temp(Th1,c,Q):
+    '''Returns the feedwater exit temp given the entry temp, the specific heat
+    capacity, and the heat transfer per unit mass flow rate required.'''
     
-    whr_mass_flow_rate = 1 # kg/s
-    feedwater_mass_flow_rate = 1 # kg/s 2.25 is common
-    feedwater_density = 1.08 # kg/L
-    F = 1.0 # LMTD correction factor for boiler
+    Th2 = -1*(Q/c - Th1)
+    return(Th2)
 
-##    Th245 = 90 # Celsius
-##    Tc245 = 60 # Celsius
-    C245 = 1.302 # Heat capacity of R245 KJ/(kg K) @atm press & 15.14 deg C
-    Cfeed = 3.3488 # Heat capacity of water/glycol KJ/(kg K) @atm press & 26.7 deg C
-    Thfeedwater = 97.5 # Temperature of automotive feedwater
+def tube_in_shell(dT, Q, U = 850):
+    '''Returns the required heat exchange area given the heat transfer required,
+    The temperature difference between the two working fluids, and the overall
+    heat transfer coefficient.'''
 
-    whr_efficiency = 0.1366 # From previous study
-
-    # Heat energy required to raise working fluid temperature.
-    q_in = whr_mass_flow_rate*C245*(Th245 - Tc245)
-    print("Heat transfer in: {:4.2f}kW".format(q_in)) # kW
-
-    W_out = q_in * whr_efficiency
-    print("Work out: {:4.2f}kW".format(W_out))
-
-    # Assuming that the heat transferred into the working fluid is 100% of the heat
-    # transferred out of the feedwater, the temperature drop of the feedwater can
-    # be found.
-
-    dT = q_in/(feedwater_mass_flow_rate*Cfeed)
-    print("dT: {:4.2f}C".format(dT))
-    Tcfeedwater = Thfeedwater - dT
-
-    # LMTD Method
-    print("245 in: {:4.2f}C\n245 out: {:4.2f}C\nFeed in: {:4.2f}C\nFeed out: {:4.2f}C".format(Tc245,Th245,Thfeedwater,Tcfeedwater))
-    dTm = ((Tcfeedwater-Th245) - (Tc245-Th245)) / math.log((Tcfeedwater-Th245)/(Thfeedwater-Tc245))
-    print("Mean temperature difference: {:4.2f}C".format(dTm))
-
-    # In the future, the heat transfer coefficient should be calculated. for now,
-    # table 10-1 form "Heat Transfer" by J.P. Holman was used Umin = 850 W/(m2 C),
-    # Umax = 1400 W/(m2 C).
-
-    U = 850 # W/(m2 C)
     A = q_in*1000/(U*dTm) # square meters
     print("Boiler heat exchange area: {:4.2f}m^2".format(A))
 
@@ -66,5 +39,5 @@ def tube_in_shell(Th245=90,Tc245=60):
     print("Number of tubes: ", n)
 
 if __name__ == "__main__":
-    tube_in_shell()
+    pass
 

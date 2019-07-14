@@ -99,6 +99,11 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
 
 #------Main------#
 if __name__ == '__main__':
+    R245fa_db = '\\R245fa Saturated properties temperature table.csv'
+    os.chdir("..")# Navigate up a directory
+    db_path=os.path.abspath(os.curdir)+r"\GHSP study\Additional references"+R245fa_db
+    # Navigate to the directory containing the working fluid database.
+    
     '''Manual entry begins here.'''
     condenser_pressure = si.get_real_number("Enter condenser pressure (MPa).\n>>>",lower = 0)
     boiler_pressure = si.get_real_number("Enter boiler pressure (MPa).\n>>>", lower = condenser_pressure)
@@ -109,15 +114,21 @@ if __name__ == '__main__':
     max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
 
     # Run cycle model
-    boil_temp = float("Inf")
-    while boil_temp > max_heat:
-        (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency)
-        boiler_pressure -= 0.01
-        
-    print("Boiler pressure: {}".format(boiler_pressure))
-    
+##    boil_temp = float("Inf")
+##    while boil_temp > max_heat:
+##        (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
+##        boiler_pressure -= 0.01
+##        
+##    print("Boiler pressure: {}".format(boiler_pressure))
+##    
+
+    (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
+    print("Power: {}\nEfficiency: {}\nCondenser temperature: {}\nBoiler temperature: {}"\
+          .format(Wm,efficiency,cond_temp,boil_temp))
+
+
     # Determine boiler heat exchanger size
-    lmtd = LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out)
+    #lmtd = LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out)
 
     time.sleep(30)
 else:
