@@ -4,19 +4,16 @@ import os
 import numpy as np
 import pandas as pd
 import time
+import sanitize_inputs as si
 
 np.set_printoptions(precision=3)
 # Sets the decimal precision when printing numpy arrays to 3. Note that further
 # significant figures are preserved, just not printed.
 
-def find_max_boiler(db_path):
-    condenser_pressure = 0.13
-    boiler_pressure = 1.26
-    turbine_efficiency = 0.787
-    pump_efficiency = 0.9
-    max_source_temp = 97.5
+def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pump_efficiency, max_source_temp, db_path):
+
     test_temp = 0
-    b_temp = 100
+    b_temp = max_source_temp-0.1
     while test_temp < b_temp:
         (Wm,eff,b_temp,c_temp,Qin_m,Qout_m) = orc.ORC_model(condenser_pressure,
                                                             boiler_pressure,
@@ -34,6 +31,10 @@ def find_max_boiler(db_path):
     
 def find_best(condenser_pressure, boiler_pressure, turbine_efficiency=0.9,
               pump_efficiency=0.9):
+    '''Takes a condenser and boiler working pressure, isentropic efficiencies of
+    the turbine and pump, and returns the best combination to maximize power per
+    unit mass flow rate and thermal efficiency.'''
+    
     max_power = 0
     power_b_pressure = None # boiler working pressure at max power
     power_c_pressure = None # condenser working pressure at max power
@@ -67,19 +68,36 @@ def find_best(condenser_pressure, boiler_pressure, turbine_efficiency=0.9,
                     
     
 R245fa_db = '\\R245fa Saturated properties temperature table.csv'
+
+db_upper_pressure_limit = 3.651
+db_lower_pressure_limit = 0.00127
+
 os.chdir("..")# Navigate up a directory
 db_path=os.path.abspath(os.curdir)+r"\GHSP study\Additional references"+R245fa_db
 # Navigate to the directory containing the working fluid database.
 
-find_max_boiler(db_path)
+p_boiler_max = si.get_real_number("Enter the boiler working pressure upper limit (MPa):\n",upper=db_upper_pressure_limit,lower=db_lower_pressure_limit)
+p_boiler_min = si.get_real_number("Enter the boiler working pressure lower limit (MPa):\n",upper=p_boiler_max,lower=db_lower_pressure_limit)
 
+p_condenser_max = si.get_real_number("Enter the condenser working pressure upper limit (MPa):\n",upper=p_boiler_min,lower=db_lower_pressure_limit)
+p_condenser_min = si.get_real_number("Enter the condenser working pressure upper limit (MPa):\n",upper=p_condenser_max,lower=db_lower_pressure_limit)
+turbine_efficiency = si.get_real_number("Enter isentropic turbine efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.787
+pump_efficiency = si.get_real_number("Enter isentropic pump efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.9
 
-condenser_pressure_range = np.linspace(0.1225, 0.5, 25)
-# Creates a numpy array with 25 data points between 0.1225 and 0.5.
-boiler_pressure_range = np.linspace(0.5, 1.26, 25)
-# Max boiler pressure in range determined by earlier numerical analysis.
-turbine_efficiency = 0.787
-pump_efficiency = 0.9
+max_source_temp = si.get_real_number("Enter the maximum heat source temperature:\n")
+
+# Creates a numpy array with 25 data points between p_condenser_min and p_condenser_max.
+condenser_pressure_range = np.linspace(p_condenser_min, p_condenser_max, 25)
+##boiler_pressure_range = np.linspace(p_boiler_min, p_boiler_max, 25)
+
+##condenser_pressure = 0.13
+##boiler_pressure = 1.26
+##turbine_efficiency = 0.787
+##pump_efficiency = 0.9
+##max_source_temp = 97.5
+
+find_max_boiler(p_condenser_min, p_boiler_max, turbine_efficiency, pump_efficiency, max_source_temp, db_path)
+
 user = None
 while(1):
     user = input()
