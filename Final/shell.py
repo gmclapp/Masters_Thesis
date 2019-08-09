@@ -120,16 +120,6 @@ while(1):
     else:
         pass
 
-##power,b_power,c_power,eff,b_eff,c_eff =find_best(condenser_pressure_range,
-##                                                 boiler_pressure_range,
-##                                                 turbine_efficiency,
-##                                                 pump_efficiency)
-
-##(Wm,eff,b_temp,c_temp,Qin_m,Qout_m) = orc.ORC_model(c_power,
-##                                                    b_power,
-##                                                    turbine_efficiency,
-##                                                    pump_efficiency,
-##                                                    db_path)
 ##print("Power output: {:4.2f}kW/(kg/s)".format(Wm))
 ##print("Thermal efficiency: {:4.4f}".format(eff))
 ##print("Qin: {:4.2f}kW/(kg/s) Qout: {:4.2f}kW/(kg/s)".format(Qin_m, Qout_m))
