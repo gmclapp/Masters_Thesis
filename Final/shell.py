@@ -10,7 +10,7 @@ np.set_printoptions(precision=3)
 # Sets the decimal precision when printing numpy arrays to 3. Note that further
 # significant figures are preserved, just not printed.
 
-def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pump_efficiency, max_source_temp, db_path):
+def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pump_efficiency, max_source_temp,c_h,m_ORC,m_h, db_path):
 
     test_temp = 0
     b_temp = max_source_temp-0.1
@@ -20,7 +20,9 @@ def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pum
                                                             turbine_efficiency,
                                                             pump_efficiency,
                                                             db_path)
-        test_temp = heatex.feedwater_exit_temp(max_source_temp, 3.7682,Qin_m)
+
+        c_h,m_ORC,m_h
+        test_temp = heatex.feedwater_exit_temp(max_source_temp,c_h,Qin_m,m_ORC,m_h)
         
         print("T: {:4.2f} deg, P: {:4.2f} MPa".format(test_temp, boiler_pressure))
         boiler_pressure -= 0.01
@@ -80,14 +82,18 @@ p_boiler_max = si.get_real_number("Enter the boiler working pressure upper limit
 p_boiler_min = si.get_real_number("Enter the boiler working pressure lower limit (MPa):\n",upper=p_boiler_max,lower=db_lower_pressure_limit)
 
 p_condenser_max = si.get_real_number("Enter the condenser working pressure upper limit (MPa):\n",upper=p_boiler_min,lower=db_lower_pressure_limit)
-p_condenser_min = si.get_real_number("Enter the condenser working pressure upper limit (MPa):\n",upper=p_condenser_max,lower=db_lower_pressure_limit)
+p_condenser_min = si.get_real_number("Enter the condenser working pressure lower limit (MPa):\n",upper=p_condenser_max,lower=db_lower_pressure_limit)
 turbine_efficiency = si.get_real_number("Enter isentropic turbine efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.787
 pump_efficiency = si.get_real_number("Enter isentropic pump efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.9
 
 max_source_temp = si.get_real_number("Enter the maximum heat source temperature:\n")
+source_specific_heat = si.get_real_number("Enter the specific heat of the heat source fluid (kJ/kgK)",lower=0)
+# 3.7682 kJ/kgK for 5050 water/glycol mixture
+m_245 = si.get_real_number("Enter the mass flow rate of the ORC working fluid (kg/s)",lower=0)
+m_source = si.get_real_number("Enter the mass flow rate of the source working fluid (kg/s)",lower=0)
 
 # Creates a numpy array with 25 data points between p_condenser_min and p_condenser_max.
-condenser_pressure_range = np.linspace(p_condenser_min, p_condenser_max, 25)
+##condenser_pressure_range = np.linspace(p_condenser_min, p_condenser_max, 25)
 ##boiler_pressure_range = np.linspace(p_boiler_min, p_boiler_max, 25)
 
 ##condenser_pressure = 0.13
@@ -96,7 +102,15 @@ condenser_pressure_range = np.linspace(p_condenser_min, p_condenser_max, 25)
 ##pump_efficiency = 0.9
 ##max_source_temp = 97.5
 
-find_max_boiler(p_condenser_min, p_boiler_max, turbine_efficiency, pump_efficiency, max_source_temp, db_path)
+find_max_boiler(p_condenser_min,
+                p_boiler_max,
+                turbine_efficiency,
+                pump_efficiency,
+                max_source_temp,
+                source_specific_heat,
+                m_245,
+                m_source,
+                db_path)
 
 user = None
 while(1):

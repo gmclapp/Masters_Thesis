@@ -13,11 +13,12 @@ def LMTD(Th1, Th2, Tc1, Tc2):
     log_mean_temp_diff = ((Th2-Tc2)-(Th1-Tc1))/math.log(((Th2-Tc2)/(Th1-Tc1)))
     return(log_mean_temp_diff)
 
-def feedwater_exit_temp(Th1,c,Q):
+def feedwater_exit_temp(Th1,c_h,Q_m,m_ORC,m_h):
     '''Returns the feedwater exit temp given the entry temp, the specific heat
-    capacity, and the heat transfer per unit mass flow rate required.'''
+    of the source fluid, the heat transfer per unit mass flow rate required,
+    and the mass flow rates for both fluids.'''
     
-    Th2 = -1*(Q/c - Th1)
+    Th2 = Th1 - (m_ORC*Q_m)/(m_h*c_h)
     return(Th2)
 
 def tube_in_shell(dT, Q, U = 850):
