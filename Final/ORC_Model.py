@@ -1,9 +1,5 @@
 import csv
 import math
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-import misc_functions as mf
 import sanitize_inputs as si
 import time
 import os
@@ -17,100 +13,50 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     models for the individual major components.'''
 
     fluid = 'R245fa'
-    temp_col = 0 # Degrees Celsius
-    press_col = 1 # MPa
-    v_col = 3 # Specific volume of vapor m3/kg
-    hl_col = 4 # Enthalpy of saturated liquid kJ/kg
-    hv_col = 5 # Enthalpy of saturated vapor kJ/kg
-    sl_col = 6 # Entropy of saturated liquid kJ/(kgK)
-    sv_col = 7 # Entropy of saturated vapor kJ/(kgK)
-        
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                             boil_pres, press_col, hv_col)
-    
-##    h1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
+
     h1 = CP.PropsSI('H', 'P', boil_pres*1000000, 'Q', 1, 'R245fa')/1000
-    
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                             boil_pres, press_col, sv_col)
-    
-##    s1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
     s1 = CP.PropsSI('S','P',boil_pres*1000000, 'Q', 1, fluid)/1000
     
-    s2 = s1 # This is the adiabatic volumetric assumption in the turbine
-
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                             cond_pres, press_col, hl_col)
     
-##    h3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
     h3 = CP.PropsSI('H', 'P', cond_pres*1000000, 'Q', 0, fluid)/1000
-##    print("h3 {:4.2f} vs. h3_alt: {:4.2f}".format(h3, h3_alt))
-    
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                             cond_pres, press_col, sl_col)
-    
-##    s3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
     s3 = CP.PropsSI('S','P',cond_pres*1000000, 'Q', 0, fluid)/1000
-##    print("s3 {:4.2f} vs. s3_alt: {:4.2f}".format(s3, s3_alt))
-    
-    # get h3 enthalpy of a saturated liquid at condenser pressure
-    # get s3 entropy of a saturated vapor at condenser pressure
 
-    # determine if the working fluid is wet, dry, or adiabatic.
-
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                                   cond_pres, press_col, sl_col)
-
-##    s2f = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    s2 = s1
     s2f = CP.PropsSI('S','P', cond_pres*1000000,'Q',0,fluid)/1000
-##    print("s2f {:4.2f} vs. s2f_alt: {:4.2f}".format(s2f, s2f_alt))
-    
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                                   cond_pres, press_col, sv_col)
-
-##    s2g = mf.interpolate(x1,y1,x2,y2,cond_pres)
     s2g = CP.PropsSI('S','P', cond_pres*1000000,'Q',1,fluid)/1000
-##    print("s2g {:4.2f} vs. s2g_alt: {:4.2f}".format(s2g, s2g_alt))
+
     
     try:
         quality = (s2 - s2f)/(s2g - s2f)
     except ZeroDivisionError:
         quality = 0
     if quality > 1:
-        print("Turbine outlet is superheated vapor! x = {}".format(quality))
-        
-    h2f = h3
+        print("Turbine outlet is superheated vapor! x = {:4.4f}".format(quality))
+        h2s = CP.PropsSI('H','S',s2*1000,'P', cond_pres*1000000, fluid)/1000
 
-    
-    # h2g = enthalpy at state 2 for a saturated liquid
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db, cond_pres, press_col, hv_col)
-    h2g = mf.interpolate(x1,y1,x2,y2, cond_pres)
-    h2fg = h2g-h2f
-    h2s = h2f + quality* h2fg
+    elif 0 <= x <= 1:
+        h2f = h3
+
+        h2g = CP.PropsSI('H','P', cond_pres*1000000, 'Q',1,fluid)/1000
+
+        
+        h2fg = h2g-h2f
+        h2s = h2f + quality* h2fg
+
     h2 = h1 - eff_t*(h1 - h2s)
 
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db, boil_pres, press_col, v_col)
-    specific_vol_3 = mf.interpolate(x1,y1,x2,y2, boil_pres)
+    specific_vol_3 = 1/CP.PropsSI('D','P',boil_pres*1000000,'Q',1,fluid)
+ 
     h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
 
     W_m = h1-h2-h4+h3 # kilowatts of power per kg/s of mass flow rate
     Qin_m = h1-h4 # kilowatts of heat trasfer in per kg/s of mass flow rate
     Qout_m = h2-h3 # kilowatts of heat transfer out per kg/s of mass flow rate
     efficiency = ((h1-h2) - (h4-h3))/(h1-h4)
-    
-##    print("Quality: {:4.2f}\nPower: {:4.2f}kW/(kg/s)\nEfficiency: {:4.2f}" \
-##          .format(quality, W_m, efficiency))
-##    print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)"\
-##          .format(Qin_m,Qout_m))
 
-    x1, y1, x2, y2 = mf.vlookup(working_fluid_db,
-                               cond_pres, press_col, temp_col)
-    cond_temp = mf.interpolate(x1,y1,x2,y2,cond_pres)
-    x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
-                            boil_pres, press_col, temp_col)
-    boil_temp = mf.interpolate(x1,y1,x2,y2,boil_pres)
-##    print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius" \
-##          .format(cond_temp,boil_temp))
+    cond_temp = CP.PropsSI('T','P',cond_pres*1000000,'Q',1,fluid)-273
+    boil_temp = CP.PropsSI('T','P',boil_pres*1000000,'Q',1,fluid)-273
+
     return(W_m,efficiency,boil_temp,cond_temp,Qin_m,Qout_m)
 
 #------Main------#
@@ -129,22 +75,10 @@ if __name__ == '__main__':
                                          upper=1.0, lower=0)
     max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
 
-    # Run cycle model
-##    boil_temp = float("Inf")
-##    while boil_temp > max_heat:
-##        (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
-##        boiler_pressure -= 0.01
-##        
-##    print("Boiler pressure: {}".format(boiler_pressure))
-##    
-
     (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
     print("Power: {}\nEfficiency: {}\nCondenser temperature: {}\nBoiler temperature: {}"\
           .format(Wm,efficiency,cond_temp,boil_temp))
 
-
-    # Determine boiler heat exchanger size
-    #lmtd = LMTD(T_hot_in, T_hot_out, T_cold_in, T_cold_out)
 
     time.sleep(30)
 else:
