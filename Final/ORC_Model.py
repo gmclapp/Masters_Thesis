@@ -7,6 +7,7 @@ import misc_functions as mf
 import sanitize_inputs as si
 import time
 import os
+import CoolProp.CoolProp as CP
 
 def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     '''This function takes a working pressure for a condenser and boiler, an
@@ -14,7 +15,8 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     and thermal efficiency for a generic ORC, as well as the working temperature
     and enthalpy at each of the four fixed states which can then be used in the
     models for the individual major components.'''
-    
+
+    fluid = 'R245fa'
     temp_col = 0 # Degrees Celsius
     press_col = 1 # MPa
     v_col = 3 # Specific volume of vapor m3/kg
@@ -26,24 +28,31 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              boil_pres, press_col, hv_col)
     
-    h1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
+##    h1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
+    h1 = CP.PropsSI('H', 'P', boil_pres*1000000, 'Q', 1, 'R245fa')/1000
     
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              boil_pres, press_col, sv_col)
     
-    s1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
+##    s1 = mf.interpolate(x1,y1,x2,y2,boil_pres)
+    s1 = CP.PropsSI('S','P',boil_pres*1000000, 'Q', 1, fluid)/1000
+    
     s2 = s1 # This is the adiabatic volumetric assumption in the turbine
 
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              cond_pres, press_col, hl_col)
     
-    h3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
+##    h3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    h3 = CP.PropsSI('H', 'P', cond_pres*1000000, 'Q', 0, fluid)/1000
+##    print("h3 {:4.2f} vs. h3_alt: {:4.2f}".format(h3, h3_alt))
     
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                              cond_pres, press_col, sl_col)
     
-    s3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
-
+##    s3 = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    s3 = CP.PropsSI('S','P',cond_pres*1000000, 'Q', 0, fluid)/1000
+##    print("s3 {:4.2f} vs. s3_alt: {:4.2f}".format(s3, s3_alt))
+    
     # get h3 enthalpy of a saturated liquid at condenser pressure
     # get s3 entropy of a saturated vapor at condenser pressure
 
@@ -52,17 +61,24 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                                    cond_pres, press_col, sl_col)
 
-    s2f = mf.interpolate(x1,y1,x2,y2,cond_pres)
+##    s2f = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    s2f = CP.PropsSI('S','P', cond_pres*1000000,'Q',0,fluid)/1000
+##    print("s2f {:4.2f} vs. s2f_alt: {:4.2f}".format(s2f, s2f_alt))
+    
     x1,y1,x2,y2 = mf.vlookup(working_fluid_db,
                                    cond_pres, press_col, sv_col)
 
-    s2g = mf.interpolate(x1,y1,x2,y2,cond_pres)
-
+##    s2g = mf.interpolate(x1,y1,x2,y2,cond_pres)
+    s2g = CP.PropsSI('S','P', cond_pres*1000000,'Q',1,fluid)/1000
+##    print("s2g {:4.2f} vs. s2g_alt: {:4.2f}".format(s2g, s2g_alt))
+    
     try:
         quality = (s2 - s2f)/(s2g - s2f)
     except ZeroDivisionError:
         quality = 0
-    
+    if quality > 1:
+        print("Turbine outlet is superheated vapor! x = {}".format(quality))
+        
     h2f = h3
 
     

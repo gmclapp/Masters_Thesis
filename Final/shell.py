@@ -21,7 +21,6 @@ def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pum
                                                             pump_efficiency,
                                                             db_path)
 
-        c_h,m_ORC,m_h
         test_temp = heatex.feedwater_exit_temp(max_source_temp,c_h,Qin_m,m_ORC,m_h)
         
         print("T: {:4.2f} deg, P: {:4.2f} MPa".format(test_temp, boiler_pressure))
@@ -30,44 +29,6 @@ def find_max_boiler(condenser_pressure, boiler_pressure, turbine_efficiency, pum
     print("Heat in: {:4.2f}kW/(kg/s)\nHeat out: {:4.2f} kW/(kg/s)".format(Qin_m,Qout_m))
     print("Condenser temperature: {:4.2f} deg Celsius\nBoiler temperature: {:4.2f} deg Celsius".format(c_temp,b_temp))
     print("Boiler pressure: {:4.2f} MPa".format(boiler_pressure))
-    
-def find_best(condenser_pressure, boiler_pressure, turbine_efficiency=0.9,
-              pump_efficiency=0.9):
-    '''Takes a condenser and boiler working pressure, isentropic efficiencies of
-    the turbine and pump, and returns the best combination to maximize power per
-    unit mass flow rate and thermal efficiency.'''
-    
-    max_power = 0
-    power_b_pressure = None # boiler working pressure at max power
-    power_c_pressure = None # condenser working pressure at max power
-    
-    max_efficiency = 0
-    efficiency_b_pressure = None # boiler working pressure at max efficiency
-    efficiency_c_pressure = None # condenser working pressure at max efficiency
-    
-    for c in condenser_pressure:
-        for b in boiler_pressure:
-            (Wm,eff,b_temp,c_temp,Qin_m,Qout_m) = orc.ORC_model(c,
-                                                                b,
-                                                                turbine_efficiency,
-                                                                pump_efficiency,
-                                                                db_path)
-            if Wm > max_power:
-                max_power = Wm
-                power_b_pressure = b
-                power_c_pressure = c
-
-            if eff > max_efficiency:
-                max_efficiency = eff
-                efficiency_b_pressure = b
-                efficiency_c_pressure = c
-    return(max_power,
-           power_b_pressure,
-           power_c_pressure,
-           max_efficiency,
-           efficiency_b_pressure,
-           efficiency_c_pressure)
-                    
     
 R245fa_db = '\\R245fa Saturated properties temperature table.csv'
 
@@ -82,7 +43,7 @@ p_boiler_max = si.get_real_number("Enter the boiler working pressure upper limit
 p_boiler_min = si.get_real_number("Enter the boiler working pressure lower limit (MPa):\n",upper=p_boiler_max,lower=db_lower_pressure_limit)
 
 p_condenser_max = si.get_real_number("Enter the condenser working pressure upper limit (MPa):\n",upper=p_boiler_min,lower=db_lower_pressure_limit)
-p_condenser_min = si.get_real_number("Enter the condenser working pressure lower limit (MPa):\n",upper=p_condenser_max,lower=db_lower_pressure_limit)
+p_condenser_min = si.get_real_number("Enter the condenser working pressure lower limit (MPa)(0.123 corresponds to a 20C working temp):\n",upper=p_condenser_max,lower=db_lower_pressure_limit)
 turbine_efficiency = si.get_real_number("Enter isentropic turbine efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.787
 pump_efficiency = si.get_real_number("Enter isentropic pump efficiency (0-1):\n",upper=1,lower=0)# Study value = 0.9
 
