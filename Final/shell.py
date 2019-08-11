@@ -61,7 +61,7 @@ m_source = si.get_real_number("Enter the mass flow rate of the source working fl
 ##boiler_pressure = 1.26
 ##turbine_efficiency = 0.787
 ##pump_efficiency = 0.9
-##max_source_temp = 97.5
+##max_source_temp = 100
 
 find_max_boiler(p_condenser_min,
                 p_boiler_max,
@@ -81,8 +81,3 @@ while(1):
     else:
         pass
 
-##print("Power output: {:4.2f}kW/(kg/s)".format(Wm))
-##print("Thermal efficiency: {:4.4f}".format(eff))
-##print("Qin: {:4.2f}kW/(kg/s) Qout: {:4.2f}kW/(kg/s)".format(Qin_m, Qout_m))
-##print("Boiler working temp: {:4.2f}C".format(b_temp))
-##print("Condenser working temp: {:4.2f}C".format(c_temp))

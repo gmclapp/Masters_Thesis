@@ -49,6 +49,7 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
  
     h4 = h3 + (specific_vol_3*(boil_pres-cond_pres))/eff_p
 
+    print("h1 = {:4.2f}, h2 = {:4.2f}, h3 = {:4.2f}, h4 = {:4.2f}".format(h1,h2,h3,h4))
     W_m = h1-h2-h4+h3 # kilowatts of power per kg/s of mass flow rate
     Qin_m = h1-h4 # kilowatts of heat trasfer in per kg/s of mass flow rate
     Qout_m = h2-h3 # kilowatts of heat transfer out per kg/s of mass flow rate
@@ -74,10 +75,11 @@ if __name__ == '__main__':
     pump_efficiency = si.get_real_number("Enter the pump efficiency (0-1).\n>>>",
                                          upper=1.0, lower=0)
     max_heat = si.get_real_number("Enter maximum heat source temperature (C).\n>>>", lower = -273)
-
+    m = si.get_real_number("Enter the mass flow rate (kg/s).\n>>>",lower = 0)
+    
     (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
     print("Power: {}\nEfficiency: {}\nCondenser temperature: {}\nBoiler temperature: {}"\
-          .format(Wm,efficiency,cond_temp,boil_temp))
+          .format(Wm*m,efficiency,cond_temp,boil_temp))
 
 
     time.sleep(30)
