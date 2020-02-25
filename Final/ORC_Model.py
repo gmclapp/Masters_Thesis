@@ -14,7 +14,7 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
 
     fluid = 'R245fa'
 
-    h1 = CP.PropsSI('H', 'P', boil_pres*1000000, 'Q', 1, 'R245fa')/1000
+    h1 = CP.PropsSI('H', 'P', boil_pres*1000000, 'Q', 1, fluid)/1000
     s1 = CP.PropsSI('S','P',boil_pres*1000000, 'Q', 1, fluid)/1000
     
     
