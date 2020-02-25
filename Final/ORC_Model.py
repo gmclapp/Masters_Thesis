@@ -34,7 +34,7 @@ def ORC_model(cond_pres, boil_pres, eff_t, eff_p,working_fluid_db):
         print("Turbine outlet is superheated vapor! x = {:4.4f}".format(quality))
         h2s = CP.PropsSI('H','S',s2*1000,'P', cond_pres*1000000, fluid)/1000
 
-    elif 0 <= x <= 1:
+    elif 0 <= quality <= 1:
         h2f = h3
 
         h2g = CP.PropsSI('H','P', cond_pres*1000000, 'Q',1,fluid)/1000
@@ -78,7 +78,7 @@ if __name__ == '__main__':
     m = si.get_real_number("Enter the mass flow rate (kg/s).\n>>>",lower = 0)
     
     (Wm,efficiency,boil_temp,cond_temp,Qin_m,Qout_m) = ORC_model(condenser_pressure,boiler_pressure,turbine_efficiency,pump_efficiency,db_path)
-    print("Power: {}\nEfficiency: {}\nCondenser temperature: {}\nBoiler temperature: {}"\
+    print("Power: {:4.2f} kW\nEfficiency: {:4.2f}\nCondenser temperature: {:4.2f} C\nBoiler temperature: {:4.2f} C"\
           .format(Wm*m,efficiency,cond_temp,boil_temp))
 
 
